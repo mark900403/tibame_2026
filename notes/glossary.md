@@ -149,4 +149,36 @@
 | `@app.task()` | 把函式註冊成「可被派發的任務」 |
 | Redis / Kafka / PubSub | 其他常見 Broker，概念相同 |
 
+## 資料庫 / MySQL
+| 名詞 | 白話解釋 |
+|------|----------|
+| 資料庫 | 有系統地儲存、查詢資料的地方 |
+| MySQL | 最流行的關聯式資料庫之一 |
+| SQL | 操作資料庫的語言 |
+| Table 資料表 | 一張表（有欄有列），真正存資料的地方 |
+| Column / Row | 欄位（屬性）/ 資料列（一筆紀錄） |
+| DQL | 查詢語言：`select` |
+| DML | 操作語言：`insert`/`delete`/`update` |
+| DDL | 定義語言：`create`/`alter`/`drop table` |
+| TCL | 交易控制：`commit`/`rollback`/`savepoint` |
+| DCL | 權限控制：`grant`/`revoke` |
+| primary key 主鍵 | 唯一識別一列的欄位（唯一、不可 null） |
+| foreign key 外來鍵 | 指向另一表主鍵的欄位（建立關聯） |
+| 子查詢 subquery | 把一個查詢結果當作另一敘述的條件/來源 |
+| join | 用共同欄位把多張表接起來查 |
+| 交易 transaction | 一組要嘛全成功、要嘛全失敗的動作 |
+| commit / rollback | 送交（正式寫入）/ 還原（取消未送交） |
+| autocommit | 自動送交模式；`=0` 啟用手動交易控制 |
+| savepoint | 交易中的存檔點，可局部 rollback |
+| grant / revoke | 授出 / 撤回權限 |
+| 使用者帳號 | `使用者名@網域名`（Host 可用 `%` 代表不限） |
+| View 檢視表 | 由 select 定義的虛擬表，不存資料 |
+| Index 索引 | 像目錄，加速查詢；佔空間、拖慢寫入 |
+| B-Tree 平衡樹 | Index 的底層儲存結構 |
+| Full Table Scan | 沒索引時掃整張表 |
+| PyMySQL | 用 Python 連 MySQL、執行 SQL 的套件 |
+| cursor 游標 | 實際下 SQL、取結果的物件 |
+| 參數化查詢 | 用 `%s`/`%(key)s` 安全代入值，防 SQL Injection |
+| fetchone / fetchall | 取一筆 / 取全部查詢結果 |
+
 ⬅ 回 [課程總覽](../README.md)

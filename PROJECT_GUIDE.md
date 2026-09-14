@@ -128,6 +128,8 @@ df = pd.read_csv("raw_data.csv", encoding="utf-8")
 
 ✅ 完成標準：資料夾裡有 `raw_data.csv`，且能重新 `read_csv` 回來。
 
+> 進階（推薦）：與其只存 CSV，可把資料存進 **MySQL** 資料庫，方便長期保存、查詢與給 API/儀表板使用。用 **PyMySQL** 寫入（[20 章](notes/20_pymysql.md)），SQL 基礎見 [15–19 章](notes/15_sql_mysql_intro.md)。對應大架構的 `Crawler → MySQL`（[09 章](notes/09_architecture_and_dev_env.md)）。
+
 ---
 
 ## Step 6：清理與轉換（pandas 兩大操作）
@@ -222,6 +224,7 @@ plt.show()
 | E4 環境管理 | 用 uv 建獨立環境、記錄套件版本、`uv sync` 團隊同步 | [13](notes/13_uv_python_env.md) |
 | E5 容器化 | 把爬蟲寫成 Dockerfile、build image、push 上 Docker Hub | [12](notes/12_docker.md) |
 | E6 分散式 | 用 RabbitMQ+Celery+Flower 讓多工人平行爬、多佇列分流 | [14](notes/14_distributed_crawler.md) |
+| E7 資料庫 | 把資料存進 MySQL（PyMySQL 寫入、SQL 查詢） | [15–20](notes/15_sql_mysql_intro.md) |
 
 建議順序：**先把 Step 1–9 的爬蟲/分析做完（會動最重要）**，再依時間投入 E1→E6 升級。面試時，「我用分散式架構一次控制多台機器爬蟲、全部容器化部署」是很有份量的一句話。
 

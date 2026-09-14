@@ -34,12 +34,25 @@
 | 13 | uv：Python 環境管理 | 獨立環境、`uv add`/`sync`/`run`、lock 檔 | [notes/13_uv_python_env.md](notes/13_uv_python_env.md) |
 | 14 | 分散式爬蟲 | RabbitMQ + Celery + Flower、多工人/多佇列 | [notes/14_distributed_crawler.md](notes/14_distributed_crawler.md) |
 
+### 第三部分：資料庫 MySQL（把資料存起來、可查詢）
+
+| # | 主題 | 你會學到 | 筆記 |
+|---|------|----------|------|
+| 15 | SQL 與 MySQL 總覽 | SQL 五大分類、EMP/DEPT 範例、select/建表背景 | [notes/15_sql_mysql_intro.md](notes/15_sql_mysql_intro.md) |
+| 16 | DML | `insert` / `delete` / `update` | [notes/16_dml.md](notes/16_dml.md) |
+| 17 | TCL | 交易：`commit` / `rollback` / `savepoint` | [notes/17_tcl.md](notes/17_tcl.md) |
+| 18 | DCL | 權限：`grant` / `revoke`、使用者帳號 | [notes/18_dcl.md](notes/18_dcl.md) |
+| 19 | View 與 Index | 檢視表（虛擬表）、索引（加速查詢） | [notes/19_view_index.md](notes/19_view_index.md) |
+| 20 | PyMySQL | 用 Python 連 MySQL、參數化查詢、commit | [notes/20_pymysql.md](notes/20_pymysql.md) |
+
 ### 工具
 
 | # | 主題 | 內容 | 連結 |
 |---|------|------|------|
 | ✎ | 名詞小字典 | 全課程關鍵名詞白話速查 | [notes/glossary.md](notes/glossary.md) |
 | ★ | 專題步驟指南 | 從 0 做出一個完整資料處理專題 | [PROJECT_GUIDE.md](PROJECT_GUIDE.md) |
+
+> 註：MySQL 段落的 **DQL(`select`)** 與 **DDL(`create table`)** 投影片本次未提供，[15 章](notes/15_sql_mysql_intro.md)有精簡背景補充，之後拿到投影片可再補完整章節。
 
 ## 怎麼跑這些程式？（環境）
 
