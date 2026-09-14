@@ -6,9 +6,11 @@
 
 ## 這門課在學什麼？（一句話）
 
-**「用 Python 把網路上的資料抓下來 → 整理乾淨 → 做成表格分析」**，中間會先把 Python 基本功（變數、迴圈、函式、資料結構、遞迴）打好。
+**「用 Python 把網路上的資料抓下來 → 整理乾淨 → 做成表格分析」**，先把 Python 基本功打好，再進入**資料工程（Data Engineering）**：用 Linux/Docker/分散式架構把爬蟲工程化。
 
 ## 學習地圖（建議照順序看）
+
+### 第一部分：Python 與資料處理基本功
 
 | # | 主題 | 你會學到 | 筆記 |
 |---|------|----------|------|
@@ -20,6 +22,22 @@
 | 06 | HTML 與 BeautifulSoup | 看懂網頁結構、`find`/`find_all`、CSS 選擇器 | [notes/06_html_beautifulsoup.md](notes/06_html_beautifulsoup.md) |
 | 07 | pandas 資料處理 | DataFrame、讀寫 CSV、過濾、轉換 `apply` | [notes/07_pandas.md](notes/07_pandas.md) |
 | 08 | Selenium 動態爬蟲 | 讓程式「操作瀏覽器」抓需要登入/JS 的網站 | [notes/08_selenium.md](notes/08_selenium.md) |
+
+### 第二部分：工程化與資料工程（環境、Docker、分散式）
+
+| # | 主題 | 你會學到 | 筆記 |
+|---|------|----------|------|
+| 09 | 架構圖與開發環境總覽 | draw.io 畫架構、整體系統藍圖 | [notes/09_architecture_and_dev_env.md](notes/09_architecture_and_dev_env.md) |
+| 10 | WSL 與 VSCode 設定 | 裝 Linux(Ubuntu)、VSCode 連 WSL、必備插件 | [notes/10_wsl_vscode.md](notes/10_wsl_vscode.md) |
+| 11 | Linux 指令與 Git | `cd`/`ls`/`mkdir`、git add/commit/push/pull | [notes/11_linux_git.md](notes/11_linux_git.md) |
+| 12 | Docker | image/container/volume、compose、Dockerfile、network | [notes/12_docker.md](notes/12_docker.md) |
+| 13 | uv：Python 環境管理 | 獨立環境、`uv add`/`sync`/`run`、lock 檔 | [notes/13_uv_python_env.md](notes/13_uv_python_env.md) |
+| 14 | 分散式爬蟲 | RabbitMQ + Celery + Flower、多工人/多佇列 | [notes/14_distributed_crawler.md](notes/14_distributed_crawler.md) |
+
+### 工具
+
+| # | 主題 | 內容 | 連結 |
+|---|------|------|------|
 | ✎ | 名詞小字典 | 全課程關鍵名詞白話速查 | [notes/glossary.md](notes/glossary.md) |
 | ★ | 專題步驟指南 | 從 0 做出一個完整資料處理專題 | [PROJECT_GUIDE.md](PROJECT_GUIDE.md) |
 

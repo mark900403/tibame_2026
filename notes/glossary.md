@@ -92,4 +92,61 @@
 | headless 無頭 | 不開視窗、在背景跑瀏覽器 |
 | cookie | 存在瀏覽器的登入憑證；帶著它可免帳密登入 |
 
+## 開發環境與工具（第二部分）
+| 名詞 | 白話解釋 |
+|------|----------|
+| WSL | Windows 裡跑 Linux(Ubuntu) 的子系統 |
+| Ubuntu | 最常見的 Linux 作業系統之一 |
+| VSCode | 微軟的免費 IDE，一個介面寫 Python+git+docker+linux |
+| IDE | 整合開發環境，輔助寫程式的工具 |
+| 插件 extension | VSCode 外掛，如 Python/Pylance/Pylint/GitLens |
+| root | 超級使用者（權限最大，平常別用，易誤刪） |
+| 架構圖 | 系統地圖：資料從哪來、經過哪、到哪去（draw.io 畫） |
+| `cd`/`ls`/`mkdir` | 切換資料夾 / 列出內容 / 新增資料夾 |
+| `code .` | 用 VSCode 打開當前資料夾 |
+| git add/commit/push | 挑選改動 / 拍快照+訊息 / 上傳雲端 |
+| origin / main | 遠端(GitHub) / 分支名（origin/main = 雲端 main） |
+| pull / conflict | 把遠端拉下來 / 兩邊改同處產生的衝突 |
+| CI/CD | 自動化測試與部署 |
+
+## Docker
+| 名詞 | 白話解釋 |
+|------|----------|
+| Docker | 把「程式+環境」打包成盒子，到哪都能跑 |
+| Image 映像檔 | 打包好的環境模板（像光碟/安裝檔） |
+| Container 容器 | 用 image 跑起來的獨立執行環境 |
+| Volume | 把容器資料連到本機硬碟，永久保存 |
+| Docker Hub | 分享 image 的地方（像 GitHub） |
+| docker-compose | 用一個 yml 一次管理多個容器 |
+| `docker ps` / `logs` | 看執行中容器 / 看容器 log |
+| Dockerfile | 打包 image 的設定檔（FROM/RUN/COPY/ENV/WORKDIR/CMD） |
+| build / push | 建立 image / 上傳 Docker Hub |
+| docker network | 讓不同容器在同一內網、用「服務名稱」互連 |
+
+## uv / Python 環境
+| 名詞 | 白話解釋 |
+|------|----------|
+| uv | 新一代 Python 環境/套件管理工具（快、一站式） |
+| 虛擬環境 .venv | 每個專案獨立的 Python 環境，互不干擾 |
+| `uv add` / `uv sync` | 裝套件 / 依 lock 一鍵同步團隊套件 |
+| `uv run python` | 用專案獨立環境的 Python 執行 |
+| pyproject.toml | 專案設定：Python 版本、套件相依 |
+| uv.lock | 鎖定精確套件版本，確保環境可重現 |
+| `.python-version` | 指定專案的 Python 版本 |
+
+## 分散式爬蟲
+| 名詞 | 白話解釋 |
+|------|----------|
+| 分散式 | 用多程序/多台機器同時做，大幅加速 |
+| Producer 主管 | 發派任務的 Python（producer.py） |
+| Broker 傳遞中心 | 收發任務的中介，課程用 RabbitMQ |
+| Worker 工人 | 拿任務執行的 Python（celery worker.py） |
+| RabbitMQ | 訊息佇列(Broker)，讓不同程序溝通 |
+| Celery | 發送/接收任務的 Python 套件 |
+| Flower | 監控工人與任務的網頁儀表板(:5555) |
+| Queue 佇列 | 任務排隊的隊伍；不同網站可分不同佇列 |
+| `-A` / `-n` / `-Q` | 程式位置 / 工人名稱 / 指定接收的佇列 |
+| `@app.task()` | 把函式註冊成「可被派發的任務」 |
+| Redis / Kafka / PubSub | 其他常見 Broker，概念相同 |
+
 ⬅ 回 [課程總覽](../README.md)

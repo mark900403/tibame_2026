@@ -210,6 +210,30 @@ plt.show()
 
 ---
 
+## 進階工程化路線（把專題「產品化」）
+
+當你的爬蟲會動、想讓它更專業（可協作、可部署、可平行加速），照這條路線升級。對應課程第二部分：
+
+| 階段 | 要做什麼 | 看哪裡 |
+|------|----------|--------|
+| E1 畫架構圖 | 用 draw.io 把「爬蟲→資料庫→API/視覺化」畫出來，放 GitHub | [09](notes/09_architecture_and_dev_env.md) |
+| E2 開發環境 | 裝 WSL(Ubuntu) + VSCode + 必備插件 | [10](notes/10_wsl_vscode.md) |
+| E3 版本控制 | 用 Linux 指令 + Git 把專題上 GitHub | [11](notes/11_linux_git.md) |
+| E4 環境管理 | 用 uv 建獨立環境、記錄套件版本、`uv sync` 團隊同步 | [13](notes/13_uv_python_env.md) |
+| E5 容器化 | 把爬蟲寫成 Dockerfile、build image、push 上 Docker Hub | [12](notes/12_docker.md) |
+| E6 分散式 | 用 RabbitMQ+Celery+Flower 讓多工人平行爬、多佇列分流 | [14](notes/14_distributed_crawler.md) |
+
+建議順序：**先把 Step 1–9 的爬蟲/分析做完（會動最重要）**，再依時間投入 E1→E6 升級。面試時，「我用分散式架構一次控制多台機器爬蟲、全部容器化部署」是很有份量的一句話。
+
+### 分散式改造的最小示範
+把你 Step 4 的「`for` 迴圈逐頁爬」改成「發任務給佇列、多工人平行」：
+1. `docker compose -f rabbitmq.yml up -d` 起 RabbitMQ + Flower（[14](notes/14_distributed_crawler.md)）。
+2. 把每一頁/每個網站包成一個 Celery 任務 `@app.task()`（原本迴圈內的爬蟲邏輯搬進去）。
+3. `producer.py` 一次發送多個任務；不同網站用不同 `-Q` 佇列。
+4. 開多個 `uv run celery ... -n workerN` 平行處理，用 Flower 觀察。
+
+---
+
 ## 新手常見卡關對照表
 
 | 症狀 | 可能原因 | 看哪裡 |
