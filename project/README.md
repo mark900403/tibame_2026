@@ -55,14 +55,18 @@ https://query1.finance.yahoo.com/v8/finance/chart/0050.TW
 
 ## 3. 要收集哪些資料（三張表）
 
-| 表 | 內容 | 主要欄位 |
-|----|------|----------|
-| `etf_price` | 每日股價 | symbol, trade_date, open/high/low/close, **adj_close**, volume |
-| `etf_dividend` | 除權息 | symbol, ex_date, amount |
-| `etf_split` | 分割 | symbol, split_date, numerator, denominator, ratio |
+**團隊定案：價格表欄位為 `date, stock_id, adj_close`**（用還原收盤算 10 年報酬）。
 
-建表 SQL 在 [`schema.sql`](schema.sql)（對應 [notes/15、16、19](../notes/15_sql_mysql_intro.md)：DDL + 主鍵 + 索引）。
-主鍵設 `(symbol, 日期)`，可避免同一天重複寫入。
+| 表 | 內容 | 欄位 |
+|----|------|------|
+| `etf_price` | 每日還原收盤 | **`date`, `stock_id`, `adj_close`** |
+| `etf_dividend` | 除權息（輔助） | stock_id, ex_date, amount |
+| `etf_split` | 分割（輔助） | stock_id, split_date, numerator, denominator, ratio |
+
+- **`stock_id`** 存純代號（如 `0050`）；打 API 時再自動補市場後綴（上市 `.TW`、上櫃 `.TWO`）。
+- 主鍵設 `(stock_id, date)`，可避免同一檔同一天重複寫入。
+- 建表 SQL 在 [`schema.sql`](schema.sql)（對應 [notes/15、16、19](../notes/15_sql_mysql_intro.md)）。
+- 價格表只留 `adj_close`（長期報酬只需要它）；若之後想加 OHLC/volume，[`etf_fetch.py`](etf_fetch.py) 裡加欄位即可。
 
 ---
 
@@ -71,8 +75,8 @@ https://query1.finance.yahoo.com/v8/finance/chart/0050.TW
 抓取程式在 [`etf_fetch.py`](etf_fetch.py)（已實跑通過）。結構：
 
 ```
-fetch_chart(symbol)   # 打 API、回傳 JSON            (course 05,06)
-parse_prices(...)     # JSON → 每日股價 DataFrame     (course 07)
+fetch_chart(stock_id) # 打 API、回傳 JSON            (course 05,06)
+parse_prices(...)     # JSON → date/stock_id/adj_close (course 07)
 parse_dividends(...)  # JSON → 除權息 DataFrame
 parse_splits(...)     # JSON → 分割 DataFrame
 cagr(...)             # 用 adj_close 算含息年化報酬
@@ -82,7 +86,7 @@ main()                # 迴圈多檔、concat、存 CSV
 ### 建議的實作順序（先會動，再擴大）
 1. **最小可行**：先抓「一檔 0050、一段期間」，`print` 出前幾筆，確認 JSON 路徑對（[05 章的『先抓一頁成功』精神](../notes/05_web_crawling_api_json.md)）。
 2. **轉表格**：把價格/除權息/分割各做成一個 DataFrame（[07 章](../notes/07_pandas.md)）。
-3. **多檔迴圈**：用 `for symbol in SYMBOLS` 抓多檔，`pd.concat` 合併；每檔間 `time.sleep(1)` 放慢（禮貌、避免被擋）。
+3. **多檔迴圈**：用 `for stock_id in STOCK_IDS` 抓多檔，`pd.concat` 合併；每檔間 `time.sleep(1)` 放慢（禮貌、避免被擋）。
 4. **存檔**：先存 CSV 當備份，再進 MySQL（下一節）。
 5. **每日更新**：之後可用排程（Airflow）每天只抓「新的一天」，避免重抓。
 
@@ -125,11 +129,11 @@ def get_conn():
                            cursorclass=pymysql.cursors.DictCursor)
 
 def save_prices(df):
+    # 欄位對齊資料庫：date, stock_id, adj_close（date 是保留字，用反引號）
     sql = """
-        insert into etf_price (symbol, trade_date, open, high, low, close, adj_close, volume)
-        values (%(symbol)s, %(date)s, %(open)s, %(high)s, %(low)s, %(close)s, %(adj_close)s, %(volume)s)
-        on duplicate key update
-            close=values(close), adj_close=values(adj_close), volume=values(volume)
+        insert into etf_price (`date`, stock_id, adj_close)
+        values (%(date)s, %(stock_id)s, %(adj_close)s)
+        on duplicate key update adj_close = values(adj_close)
     """
     rows = df.where(df.notna(), None).to_dict("records")   # NaN → None
     try:
