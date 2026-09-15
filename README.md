@@ -51,6 +51,7 @@
 |---|------|------|------|
 | ✎ | 名詞小字典 | 全課程關鍵名詞白話速查 | [notes/glossary.md](notes/glossary.md) |
 | ★ | 專題步驟指南 | 從 0 做出一個完整資料處理專題 | [PROJECT_GUIDE.md](PROJECT_GUIDE.md) |
+| ⚑ | 專題實作範例 | 被動式 ETF 資料收集（Yahoo API，含程式碼） | [project/README.md](project/README.md) |
 
 > 註：MySQL 段落的 **DQL(`select`)** 與 **DDL(`create table`)** 投影片本次未提供，[15 章](notes/15_sql_mysql_intro.md)有精簡背景補充，之後拿到投影片可再補完整章節。
 
