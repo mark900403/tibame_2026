@@ -118,7 +118,15 @@ CAGR = (期末 adj_close / 期初 adj_close) ^ (1/年數) − 1
 
 ## 6. 存進 MySQL（PyMySQL，對應 [notes/20](../notes/20_pymysql.md)）
 
-先用 [`schema.sql`](schema.sql) 建表，再用參數化查詢批次寫入。用 `INSERT ... ON DUPLICATE KEY UPDATE` 做「有就更新、沒有就新增」（每天重跑不會爆主鍵）：
+完整入庫程式在 [`etf_to_mysql.py`](etf_to_mysql.py)：**三張表（價格、除權息、分割）都會寫入**。連線資訊用環境變數（不要把密碼寫死）：
+```bash
+mysql etf < schema.sql        # 先建表
+export MYSQL_HOST=localhost MYSQL_USER=你的帳號 MYSQL_PASSWORD=你的密碼 MYSQL_DB=etf
+python etf_to_mysql.py        # 抓取並寫入三張表
+```
+> 已本機用 MariaDB 實測：3 檔寫入 price 8,763 / dividend 68 / split 0 列；**重跑具冪等性**（`ON DUPLICATE KEY UPDATE`，不會爆主鍵、筆數不變）。
+
+核心寫法：用參數化查詢批次寫入，`INSERT ... ON DUPLICATE KEY UPDATE` 做「有就更新、沒有就新增」：
 
 ```python
 import pymysql
@@ -145,7 +153,7 @@ def save_prices(df):
         conn.rollback()
         raise
 ```
-> `etf_dividend`、`etf_split` 同理，各寫一個 `save_xxx()`。**參數化**（`%(key)s`）不要用字串拼接（防 SQL Injection）。
+> `etf_dividend`、`etf_split` 同理，各有 `save_dividends()` / `save_splits()`（見 [`etf_to_mysql.py`](etf_to_mysql.py)）。**參數化**（`%(key)s`）不要用字串拼接（防 SQL Injection）。
 
 ---
 
@@ -214,6 +222,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 ### 檔案
 - [`etf_fetch.py`](etf_fetch.py)：抓取 + 解析 + 存 CSV（已實測）。
+- [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
 - [`schema.sql`](schema.sql)：MySQL 三張表定義。
 
 ⬅ 回 [課程總覽](../README.md) ｜ 相關：[05 API](../notes/05_web_crawling_api_json.md)、[07 pandas](../notes/07_pandas.md)、[20 PyMySQL](../notes/20_pymysql.md)、[專題步驟指南](../PROJECT_GUIDE.md)
