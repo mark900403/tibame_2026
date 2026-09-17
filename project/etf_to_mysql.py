@@ -12,8 +12,8 @@
 from __future__ import annotations
 import os
 import pymysql
-from etf_fetch import (STOCK_IDS, fetch_chart,
-                       parse_prices, parse_dividends, parse_splits)
+from etf_fetch_pro import (STOCK_IDS, fetch_chart,
+                           parse_prices, parse_dividends, parse_splits)
 
 # ── 連線設定：從環境變數讀，避免把密碼寫死（course 20 安全提醒）──
 DB_CONFIG = dict(

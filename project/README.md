@@ -93,7 +93,7 @@ main()                # 迴圈多檔、concat、存 CSV
 執行（本 repo 已附 `pyproject.toml`，用 uv 一鍵安裝——course 13）：
 ```bash
 uv sync                                  # 依 pyproject.toml/uv.lock 裝好 pandas、pymysql
-uv run python project/etf_fetch.py       # 產生 etf_price.csv / etf_dividend.csv / etf_split.csv
+uv run python project/etf_fetch.py       # 會問你要查哪些 ETF（Enter 用預設）→ 產生三個 CSV
 ```
 > 也可用傳統方式：`python -m venv .venv && source .venv/bin/activate && pip install pandas`。
 
@@ -222,8 +222,8 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 ---
 
 ### 檔案
-- [`etf_fetch.py`](etf_fetch.py)：抓取 + 解析 + 存 CSV（進階寫法，已實測）。
-- [`etf_fetch_beginner.py`](etf_fetch_beginner.py)：**初學者版**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設），適合看懂與解釋。
+- [`etf_fetch.py`](etf_fetch.py)：**主檔（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
+- [`etf_fetch_pro.py`](etf_fetch_pro.py)：**進階版**，功能相同，用實務寫法（型別標註、list comprehension 等），供對照學習；`etf_to_mysql.py` 也是 import 這支的函式。
 - [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
 - [`schema.sql`](schema.sql)：MySQL 三張表定義。
 
