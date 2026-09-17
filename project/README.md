@@ -90,11 +90,12 @@ main()                # 迴圈多檔、concat、存 CSV
 4. **存檔**：先存 CSV 當備份，再進 MySQL（下一節）。
 5. **每日更新**：之後可用排程（Airflow）每天只抓「新的一天」，避免重抓。
 
-執行：
+執行（本 repo 已附 `pyproject.toml`，用 uv 一鍵安裝——course 13）：
 ```bash
-pip install pandas          # 或 uv add pandas（course 13）
-python etf_fetch.py         # 產生 etf_price.csv / etf_dividend.csv / etf_split.csv
+uv sync                                  # 依 pyproject.toml/uv.lock 裝好 pandas、pymysql
+uv run python project/etf_fetch.py       # 產生 etf_price.csv / etf_dividend.csv / etf_split.csv
 ```
+> 也可用傳統方式：`python -m venv .venv && source .venv/bin/activate && pip install pandas`。
 
 ---
 
