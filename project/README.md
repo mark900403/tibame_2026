@@ -223,7 +223,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 ### 檔案
 - [`etf_fetch.py`](etf_fetch.py)：抓取 + 解析 + 存 CSV（進階寫法，已實測）。
-- [`etf_fetch_beginner.py`](etf_fetch_beginner.py)：**初學者版**，功能相同，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註），適合看懂與解釋。
+- [`etf_fetch_beginner.py`](etf_fetch_beginner.py)：**初學者版**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設），適合看懂與解釋。
 - [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
 - [`schema.sql`](schema.sql)：MySQL 三張表定義。
 

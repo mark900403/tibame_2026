@@ -108,12 +108,29 @@ def calc_cagr(prices, stock_id):
     return cagr
 
 
+def ask_stock_ids():
+    # 讓使用者輸入要查的 ETF；直接按 Enter 就用上面的預設 STOCK_IDS
+    text = input("請輸入 ETF 代號（多檔用逗號或空白分隔，直接按 Enter 用預設）：").strip()
+    if text == "":
+        return STOCK_IDS
+    text = text.replace(",", " ")     # 逗號換成空白，這樣兩種分隔都能用
+    ids = []
+    for x in text.split():            # 依空白切成一個一個代號
+        x = x.strip().upper()         # 去掉前後空白，字母轉大寫（如 00679b → 00679B）
+        if x != "":
+            ids.append(x)
+    return ids
+
+
 def main():
+    stock_ids = ask_stock_ids()
+    print("這次要抓：", stock_ids)
+
     all_prices = []
     all_dividends = []
     all_splits = []
 
-    for stock_id in STOCK_IDS:
+    for stock_id in stock_ids:
         print("抓取", stock_id, "...")
         data = fetch_chart(stock_id)
         all_prices.append(parse_prices(stock_id, data))
@@ -133,7 +150,7 @@ def main():
 
     print("完成：股價", len(prices), "筆，除權息", len(dividends), "筆，分割", len(splits), "筆")
     print("各 ETF 含息年化報酬：")
-    for stock_id in STOCK_IDS:
+    for stock_id in stock_ids:
         cagr = calc_cagr(prices, stock_id)
         if cagr is not None:
             print("  ", stock_id, ":", round(cagr * 100, 2), "% /年")
