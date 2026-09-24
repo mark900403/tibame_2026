@@ -4,4 +4,5 @@ __pycache__/
 etf_price.csv
 etf_dividend.csv
 etf_split.csv
+passive_etf_list.csv
 .venv/

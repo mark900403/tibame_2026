@@ -221,7 +221,38 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 ---
 
+## 11. 自動產生「被動式 ETF 收錄清單」（全台股 → ETF → 被動式）
+
+組內決定的流程：**抓全台股標的 → 篩出 ETF → 篩出被動式**，用來決定要收錄哪些 ETF（呼應第 3 節的「涵蓋範圍」）。
+
+- 程式：[`etf_universe.py`](etf_universe.py)（已實測）。
+- 資料來源：**FinMind `TaiwanStockInfo`**（回傳 JSON，含每檔的 `industry_category` 分類；FinMind 正是課程 [notes/14](../notes/14_distributed_crawler.md) 提到的專案）。
+- 流程：抓全台股（約 4,300 檔）→ 用分類挑出 ETF → 用命名規則挑出被動式 → 輸出 `passive_etf_list.csv`（欄位 `stock_id, stock_name, market`）。
+- 實測結果：**被動式 330 檔**（上市 186、上櫃 144）。
+
+被動式判斷規則（依台股命名慣例的近似判斷）：
+- 排除 **槓桿型**（代號結尾 `L`，如 00631L 正2）、**反向型**（結尾 `R`，如 00632R 反1）、**主動式**（結尾 `A` 或名稱含「主動」）。
+- 保留市值型、高股息、債券等追蹤指數的原型 ETF。
+- ⚠ 這是近似規則；要 100% 精準需查每檔公開說明書。商品期貨(結尾 `U`) 目前算被動式，若報告只要股票/債券可再排除。
+
+### ⚠ 上市 / 上櫃：Yahoo 後綴不同（很重要）
+- 上市(twse) → `.TW`；**上櫃(tpex) → `.TWO`**。
+- **很多債券 ETF 在上櫃**（例：`00679B` 元大美債20年是 tpex，Yahoo 要用 `00679B.TWO`，用 `.TW` 會 404）。
+- 所以抓價時要**依 `market` 決定後綴**：
+  ```python
+  suffix = ".TW" if market == "twse" else ".TWO"
+  symbol = stock_id + suffix
+  ```
+
+### 串起來（清單 → 抓價 → 入庫）
+1. `uv run python project/etf_universe.py`  → 產生 `passive_etf_list.csv`（330 檔）。
+2. 讀這份清單的 `stock_id` + `market`，用對的後綴丟給抓價程式（Yahoo）→ 寫進 MySQL。
+   > 目前 `etf_fetch.py` / `etf_fetch_pro.py` 用單一 `.TW`，若要跑上櫃(含債券)請改成依 `market` 給後綴。
+
+---
+
 ### 檔案
+- [`etf_universe.py`](etf_universe.py)：全台股 → ETF → 被動式，產生收錄清單 `passive_etf_list.csv`（已實測 330 檔）。
 - [`etf_fetch.py`](etf_fetch.py)：**主檔（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
 - [`etf_fetch_pro.py`](etf_fetch_pro.py)：**進階版**，功能相同，用實務寫法（型別標註、list comprehension 等），供對照學習；`etf_to_mysql.py` 也是 import 這支的函式。
 - [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
