@@ -1,19 +1,21 @@
 """
-把抓到的 ETF 資料寫進 MySQL（三張表都寫）。
-對應課程：17(交易 commit/rollback)、20(PyMySQL 參數化查詢)
+把「被動式 ETF」的股價 / 除權息 / 分割 寫進 MySQL（三張表都寫）。
+流程：etf_universe(全台股→ETF→被動式) → 逐檔 Yahoo 抓價(依市場給後綴) → 寫入 MySQL
+對應課程：12(Docker)、17(交易 commit/rollback)、20(PyMySQL 參數化查詢)
 
 用法：
-    pip install pymysql pandas            # 或 uv add pymysql pandas
-    # 先建表：mysql 裡 SOURCE schema.sql
-    # 連線資訊用環境變數（不要把密碼寫死在程式裡）
-    export MYSQL_HOST=localhost MYSQL_USER=root MYSQL_PASSWORD=你的密碼 MYSQL_DB=etf
-    python etf_to_mysql.py
+    uv sync                               # 裝好 pandas、pymysql
+    mysql etf < project/schema.sql        # 先建表
+    export MYSQL_HOST=localhost MYSQL_USER=你的帳號 MYSQL_PASSWORD=你的密碼 MYSQL_DB=etf
+    # 可選：只跑前 N 檔測試 → export ETF_LIMIT=5
+    uv run python project/etf_to_mysql.py
 """
 from __future__ import annotations
 import os
+import time
 import pymysql
-from etf_fetch_pro import (STOCK_IDS, fetch_chart,
-                           parse_prices, parse_dividends, parse_splits)
+from etf_fetch_pro import (fetch_chart, parse_prices, parse_dividends, parse_splits)
+from etf_universe import get_passive_etf_list
 
 # ── 連線設定：從環境變數讀，避免把密碼寫死（course 20 安全提醒）──
 DB_CONFIG = dict(
@@ -47,7 +49,6 @@ def _save(df, sql: str) -> int:
 
 
 def save_prices(df) -> int:
-    # 團隊價格表欄位：date, stock_id, adj_close（date 是保留字，用反引號）
     sql = """
         insert into etf_price (`date`, stock_id, adj_close)
         values (%(date)s, %(stock_id)s, %(adj_close)s)
@@ -78,14 +79,34 @@ def save_splits(df) -> int:
 
 
 def main():
+    etfs = get_passive_etf_list()          # [{stock_id, stock_name, market}, ...]
+
+    limit = os.environ.get("ETF_LIMIT")    # 測試時可只跑前 N 檔
+    if limit:
+        etfs = etfs[:int(limit)]
+
+    print(f"準備寫入 {len(etfs)} 檔被動式 ETF 到 MySQL ...")
     total_p = total_d = total_s = 0
-    for sid in STOCK_IDS:
-        print(f"抓取並寫入 {sid} ...")
-        data = fetch_chart(sid)
-        total_p += save_prices(parse_prices(sid, data))
-        total_d += save_dividends(parse_dividends(sid, data))
-        total_s += save_splits(parse_splits(sid, data))
-    print(f"完成：price {total_p} 列、dividend {total_d} 列、split {total_s} 列 已寫入 MySQL")
+    failed = []
+
+    for i, e in enumerate(etfs, start=1):
+        sid = e["stock_id"]
+        market = e["market"]
+        try:
+            data = fetch_chart(sid, market)            # 依市場給 .TW / .TWO
+            total_p += save_prices(parse_prices(sid, data))
+            total_d += save_dividends(parse_dividends(sid, data))
+            total_s += save_splits(parse_splits(sid, data))
+        except Exception as err:
+            failed.append(sid)                          # 單檔失敗不中斷整批
+            print(f"  ⚠ {sid} 失敗：{str(err)[:60]}")
+        time.sleep(1)                                   # 禮貌：放慢，避免被擋
+        if i % 20 == 0:
+            print(f"  進度 {i}/{len(etfs)} ...")
+
+    print(f"\n完成：price {total_p} 列、dividend {total_d} 列、split {total_s} 列 已寫入 MySQL")
+    if failed:
+        print(f"失敗 {len(failed)} 檔：{failed}")
 
 
 if __name__ == "__main__":

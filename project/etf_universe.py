@@ -76,4 +76,6 @@ def main():
     print(df.head(10).to_string(index=False))
 
 
-main()
+# 只有「直接執行這個檔」時才產生 CSV；被別的程式 import 時不會自動跑
+if __name__ == "__main__":
+    main()

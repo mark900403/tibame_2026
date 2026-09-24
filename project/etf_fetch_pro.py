@@ -23,9 +23,14 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                          "AppleWebKit/537.36 Chrome/151 Safari/537.36"}
 
 
-def fetch_chart(stock_id: str, years: int = YEARS) -> dict:
+def market_suffix(market: str) -> str:
+    """上市(twse) → .TW；上櫃(tpex) → .TWO（很多債券 ETF 在上櫃）。"""
+    return ".TW" if market == "twse" else ".TWO"
+
+
+def fetch_chart(stock_id: str, market: str = "twse", years: int = YEARS) -> dict:
     """打 Yahoo chart API，回傳解析後的 JSON（course 05：urllib + json）。"""
-    symbol = f"{stock_id}{MARKET_SUFFIX}"          # 0050 → 0050.TW
+    symbol = f"{stock_id}{market_suffix(market)}"  # 0050+twse → 0050.TW；00679B+tpex → 00679B.TWO
     period2 = int(time.time())
     period1 = period2 - 60 * 60 * 24 * 365 * years
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"

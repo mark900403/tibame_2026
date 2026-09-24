@@ -119,13 +119,14 @@ CAGR = (期末 adj_close / 期初 adj_close) ^ (1/年數) − 1
 
 ## 6. 存進 MySQL（PyMySQL，對應 [notes/20](../notes/20_pymysql.md)）
 
-完整入庫程式在 [`etf_to_mysql.py`](etf_to_mysql.py)：**三張表（價格、除權息、分割）都會寫入**。連線資訊用環境變數（不要把密碼寫死）：
+完整入庫程式在 [`etf_to_mysql.py`](etf_to_mysql.py)：**自動抓「被動式 ETF 清單」（`etf_universe`）→ 依市場給 `.TW`/`.TWO` 抓價 → 三張表（價格、除權息、分割）都寫入**。單檔失敗（如已下市）會略過、不中斷整批。連線資訊用環境變數（不要把密碼寫死）：
 ```bash
-mysql etf < schema.sql        # 先建表
+mysql etf < project/schema.sql        # 先建表
 export MYSQL_HOST=localhost MYSQL_USER=你的帳號 MYSQL_PASSWORD=你的密碼 MYSQL_DB=etf
-python etf_to_mysql.py        # 抓取並寫入三張表
+export ETF_LIMIT=15                    # （可選）測試時只跑前 15 檔
+uv run python project/etf_to_mysql.py  # 抓取並寫入三張表
 ```
-> 已本機用 MariaDB 實測：3 檔寫入 price 8,763 / dividend 68 / split 0 列；**重跑具冪等性**（`ON DUPLICATE KEY UPDATE`，不會爆主鍵、筆數不變）。
+> 已本機用 MariaDB 實測：含上櫃 `006201`（`.TWO`）等 15 檔寫入成功（4 檔已下市自動略過）；**重跑具冪等性**（`ON DUPLICATE KEY UPDATE`，不會爆主鍵、筆數不變）。
 
 核心寫法：用參數化查詢批次寫入，`INSERT ... ON DUPLICATE KEY UPDATE` 做「有就更新、沒有就新增」：
 
@@ -245,9 +246,9 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
   ```
 
 ### 串起來（清單 → 抓價 → 入庫）
-1. `uv run python project/etf_universe.py`  → 產生 `passive_etf_list.csv`（330 檔）。
-2. 讀這份清單的 `stock_id` + `market`，用對的後綴丟給抓價程式（Yahoo）→ 寫進 MySQL。
-   > 目前 `etf_fetch.py` / `etf_fetch_pro.py` 用單一 `.TW`，若要跑上櫃(含債券)請改成依 `market` 給後綴。
+1. （可選）`uv run python project/etf_universe.py` → 產生 `passive_etf_list.csv`（330 檔）供檢視。
+2. `uv run python project/etf_to_mysql.py` → **自動**抓被動式清單、依 `market` 給 `.TW`/`.TWO`、寫進 MySQL 三張表。
+   > `etf_to_mysql.py` 已直接呼叫 `etf_universe.get_passive_etf_list()`，並用 `etf_fetch_pro.fetch_chart(stock_id, market)` 處理上市/上櫃後綴，不需手動改。
 
 ---
 
