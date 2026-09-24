@@ -252,7 +252,35 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 ---
 
+## 12. 打包成 Docker Image（對應 [notes/12](../notes/12_docker.md)）
+
+把「抓被動式 ETF → 寫進 MySQL」整包打包成 image，到哪都能跑。相關檔在 **repo 根目錄**：`Dockerfile`、`docker-compose.yml`、`.dockerignore`。
+
+### 方式一：`docker compose` 一鍵（含 MySQL，最簡單）
+```bash
+docker compose up --build      # 建 image、起 MySQL（自動載入 schema.sql 建表）、跑抓價入庫
+docker compose down            # 關閉（要連資料一起刪加 -v）
+```
+- MySQL 用官方 `mysql:8`，第一次啟動自動執行 `project/schema.sql` 建表。
+- crawler 會**等 MySQL 健康後**才開始寫入（`depends_on: service_healthy`）。
+- 想先小量測試：把 `docker-compose.yml` 裡 `ETF_LIMIT: "15"` 那行打開。
+- 容器間用**服務名稱 `mysql`** 互連（同一 docker 內網，[notes/12](../notes/12_docker.md)）。
+
+### 方式二：只 build image、連你自己的 MySQL
+```bash
+docker build -t <你的帳號>/etf-crawler:0.0.1 .
+docker run --rm \
+  -e MYSQL_HOST=你的DB位置 -e MYSQL_USER=帳號 -e MYSQL_PASSWORD=密碼 -e MYSQL_DB=etf \
+  <你的帳號>/etf-crawler:0.0.1
+docker push <你的帳號>/etf-crawler:0.0.1      # 上傳 Docker Hub（course 12）
+```
+
+> ⚠ 說明：這份 Dockerfile / compose 已寫好並通過 YAML 驗證，但**產生它的雲端環境沒有 Docker**，所以無法在該處實際 build；請在你有 **Docker Desktop** 的機器上建置。裡面要跑的 Python 抓價入庫流程，已在本機 MariaDB 實測通過（見第 6 節）。
+
+---
+
 ### 檔案
+- [`../Dockerfile`](../Dockerfile) / [`../docker-compose.yml`](../docker-compose.yml)：打包成 image、一鍵起 MySQL+抓價入庫。
 - [`etf_universe.py`](etf_universe.py)：全台股 → ETF → 被動式，產生收錄清單 `passive_etf_list.csv`（已實測 330 檔）。
 - [`etf_fetch.py`](etf_fetch.py)：**主檔（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
 - [`etf_fetch_pro.py`](etf_fetch_pro.py)：**進階版**，功能相同，用實務寫法（型別標註、list comprehension 等），供對照學習；`etf_to_mysql.py` 也是 import 這支的函式。

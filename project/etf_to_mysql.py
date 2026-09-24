@@ -20,6 +20,7 @@ from etf_universe import get_passive_etf_list
 # ── 連線設定：從環境變數讀，避免把密碼寫死（course 20 安全提醒）──
 DB_CONFIG = dict(
     host=os.environ.get("MYSQL_HOST", "localhost"),
+    port=int(os.environ.get("MYSQL_PORT", "3306")),
     user=os.environ.get("MYSQL_USER", "root"),
     password=os.environ.get("MYSQL_PASSWORD", ""),
     database=os.environ.get("MYSQL_DB", "etf"),
