@@ -1,7 +1,5 @@
-# 被動式 ETF 資料收集（初學者版）
-# 只用課程教過的寫法：普通 for 迴圈、if/else、f-string、pandas 基本操作。
-# 對照進階版 etf_fetch_pro.py。
-# 用法： uv run python project/etf_fetch.py   （或先裝好 pandas 再 python 執行）
+# 被動式 ETF 資料收集
+# 用法： uv run python project/etf_fetch.py
 
 import json
 import time
@@ -10,10 +8,10 @@ import urllib.request
 import pandas as pd
 
 
-# ── 設定（要改抓哪幾檔、幾年，只改這裡）──
-STOCK_IDS = ["0050", "0056", "006208"]   # 純代號（用字串，前面的 0 才不會不見）
+# ── 設定（哪幾檔ETF、過去幾年）──
+STOCK_IDS = ["0050", "0056", "006208"]    # 純代號（用字串，前面的 0 才不會不見）
 MARKET_SUFFIX = ".TW"                     # 上市 .TW；上櫃 .TWO
-YEARS = 12                                # 抓幾年
+YEARS = 10                                # 抓幾年
 HEADERS = {"User-Agent": "Mozilla/5.0"}   # 假裝成瀏覽器，避免被擋
 
 
@@ -27,7 +25,7 @@ def fetch_chart(stock_id):
     # 組出網址，去 Yahoo 抓資料，回傳解析後的 JSON（dict）
     symbol = stock_id + MARKET_SUFFIX          # 0050 + .TW = 0050.TW
     period2 = int(time.time())                 # 現在（秒）
-    period1 = period2 - 60 * 60 * 24 * 365 * YEARS   # 12 年前（秒）
+    period1 = period2 - 60 * 60 * 24 * 365 * YEARS   # N 年前（秒）
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?period1={period1}&period2={period2}&interval=1d&events=div,split"
 
     request = urllib.request.Request(url, headers=HEADERS)
@@ -46,7 +44,7 @@ def parse_prices(stock_id, data):
     rows = []
     for i in range(len(timestamps)):
         price = adj_close_list[i]
-        if price is None:          # 非交易日/停牌沒有價格 → 跳過
+        if price is None:          # 非交易日 → 沒有價格 → 跳過
             continue
         row = {
             "date": get_date_text(timestamps[i]),
@@ -58,7 +56,7 @@ def parse_prices(stock_id, data):
 
 
 def parse_dividends(stock_id, data):
-    # 把除權息挖出來：stock_id, ex_date, amount
+    # 把除權息找出來：stock_id, ex_date, amount
     result = data["chart"]["result"][0]
     rows = []
     if "events" in result and "dividends" in result["events"]:
@@ -75,7 +73,7 @@ def parse_dividends(stock_id, data):
 
 
 def parse_splits(stock_id, data):
-    # 把分割挖出來（台股 ETF 常已還原，可能沒有）
+    # 把分割找出來（台股 ETF 常常已還原，可能沒有數據）
     result = data["chart"]["result"][0]
     rows = []
     if "events" in result and "splits" in result["events"]:
@@ -110,7 +108,7 @@ def calc_cagr(prices, stock_id):
 
 def ask_stock_ids():
     # 讓使用者輸入要查的 ETF；直接按 Enter 就用上面的預設 STOCK_IDS
-    text = input("請輸入 ETF 代號（多檔用逗號或空白分隔，直接按 Enter 用預設）：").strip()
+    text = input("請輸入 ETF 代號（多檔用逗號或空白分隔，直接按 Enter 預設0050, 0056, 006208）：").strip()
     if text == "":
         return STOCK_IDS
     text = text.replace(",", " ")     # 逗號換成空白，這樣兩種分隔都能用
