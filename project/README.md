@@ -268,11 +268,13 @@ docker compose down            # 關閉（要連資料一起刪加 -v）
 
 ### 方式二：只 build image、連你自己的 MySQL
 ```bash
-docker build -t <你的帳號>/etf-crawler:0.0.1 .
+docker build -t mark0403/etf-crawler:0.0.1 .
 docker run --rm \
   -e MYSQL_HOST=你的DB位置 -e MYSQL_USER=帳號 -e MYSQL_PASSWORD=密碼 -e MYSQL_DB=etf \
-  <你的帳號>/etf-crawler:0.0.1
-docker push <你的帳號>/etf-crawler:0.0.1      # 上傳 Docker Hub（course 12）
+  mark0403/etf-crawler:0.0.1
+# 上傳 Docker Hub（course 12）：先登入再 push
+docker login                                  # 輸入 Docker Hub 帳密/Token
+docker push mark0403/etf-crawler:0.0.1
 ```
 
 > ⚠ 說明：這份 Dockerfile / compose 已寫好並通過 YAML 驗證，但**產生它的雲端環境沒有 Docker**，所以無法在該處實際 build；請在你有 **Docker Desktop** 的機器上建置。裡面要跑的 Python 抓價入庫流程，已在本機 MariaDB 實測通過（見第 6 節）。
