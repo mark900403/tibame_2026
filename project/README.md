@@ -46,7 +46,7 @@ https://query1.finance.yahoo.com/v8/finance/chart/0050.TW
   - **除權息**：`chart.result[0].events.dividends` → 每筆 `{date, amount}`
   - **分割**：`chart.result[0].events.splits` → 每筆 `{date, numerator, denominator, splitRatio}`
 
-> 實測（本專案 `etf_fetch.py`）：`0050.TW / 0056.TW / 006208.TW` 12 年共 8,763 筆日價、68 筆除權息。
+> 實測：`0050 / 0056 / 006208` 12 年共 8,763 筆日價、68 筆除權息。
 > ⚠ **分割**：台股 ETF 的分割 Yahoo 多半已「還原」進 `close`，所以 `events.splits` 常是空的（美股如 AAPL 才會列出 `4:1`）。這不是程式錯，是資料特性——詳見第 5 節。
 
 > 替代方案：也可用 `yfinance` 套件（`pip install yfinance`，`yf.Ticker("0050.TW").history(period="10y", auto_adjust=False)`）一次拿到 OHLC+Dividends+Splits。但**課程教的是自己打 API+解析 JSON**，所以本專案用原生 `urllib`（更貼合課程、也更懂原理）。
@@ -66,21 +66,19 @@ https://query1.finance.yahoo.com/v8/finance/chart/0050.TW
 - **`stock_id`** 存純代號（如 `0050`）；打 API 時再自動補市場後綴（上市 `.TW`、上櫃 `.TWO`）。
 - 主鍵設 `(stock_id, date)`，可避免同一檔同一天重複寫入。
 - 建表 SQL 在 [`schema.sql`](schema.sql)（對應 [notes/15、16、19](../notes/15_sql_mysql_intro.md)）。
-- 價格表只留 `adj_close`（長期報酬只需要它）；若之後想加 OHLC/volume，[`etf_fetch.py`](etf_fetch.py) 裡加欄位即可。
+- 價格表只留 `adj_close`（長期報酬只需要它）；若之後想加 OHLC/volume，在 `etf_to_mysql.py` 的 `parse_prices` 裡加欄位即可。
 
 ---
 
 ## 4. 程式架構（模組化）與實作步驟
 
-抓取程式在 [`etf_fetch.py`](etf_fetch.py)（已實跑通過）。結構：
+抓取/入庫程式在 [`etf_to_mysql.py`](etf_to_mysql.py)（已實跑通過）。結構：
 
 ```
-fetch_chart(stock_id) # 打 API、回傳 JSON            (course 05,06)
-parse_prices(...)     # JSON → date/stock_id/adj_close (course 07)
-parse_dividends(...)  # JSON → 除權息 DataFrame
-parse_splits(...)     # JSON → 分割 DataFrame
-cagr(...)             # 用 adj_close 算含息年化報酬
-main()                # 迴圈多檔、concat、存 CSV
+fetch_chart(stock_id, market)  # 打 Yahoo API、依市場給 .TW/.TWO   (course 05,06)
+parse_prices/dividends/splits  # JSON → DataFrame                  (course 07)
+save_prices/dividends/splits   # 寫進 MySQL（參數化 + upsert）      (course 20)
+main()                         # 讀清單 → 逐檔抓 → 寫三張表（不需使用者輸入）
 ```
 
 ### 建議的實作順序（先會動，再擴大）
@@ -93,9 +91,10 @@ main()                # 迴圈多檔、concat、存 CSV
 執行（本 repo 已附 `pyproject.toml`，用 uv 一鍵安裝——course 13）：
 ```bash
 uv sync                                  # 依 pyproject.toml/uv.lock 裝好 pandas、pymysql
-uv run python project/etf_fetch.py       # 會問你要查哪些 ETF（Enter 用預設）→ 產生三個 CSV
+mysql etf < project/schema.sql           # 先建表
+export MYSQL_HOST=localhost MYSQL_USER=帳號 MYSQL_PASSWORD=密碼 MYSQL_DB=etf
+uv run python project/etf_to_mysql.py    # 自動全抓被動式 ETF → 寫進 MySQL（不需輸入）
 ```
-> 也可用傳統方式：`python -m venv .venv && source .venv/bin/activate && pip install pandas`。
 
 ---
 
@@ -215,7 +214,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 你最後交出的東西建議是：
 1. 三張 MySQL 表（`etf_price` / `etf_dividend` / `etf_split`）+ 一份 `schema.sql`。
 2. 一份「資料字典」：每欄意義、單位、更新頻率、資料期間。
-3. `etf_fetch.py` 抓取程式（可重跑更新）。
+3. `etf_to_mysql.py` 抓取/入庫程式（可重跑更新）。
 4. （可選）一個 `cagr()` / 報酬試算的小工具，方便回測組直接用。
 
 有了明確介面，選股組讀你的表就能直接做選股與 10 年模擬。
@@ -287,7 +286,6 @@ docker push mark0403/etf-crawler:0.0.1
 ### 檔案
 - [`../Dockerfile`](../Dockerfile) / [`../docker-compose.yml`](../docker-compose.yml)：打包成 image、一鍵起 MySQL+抓價入庫。
 - [`etf_universe.py`](etf_universe.py)：全台股 → ETF → 被動式，產生收錄清單 `passive_etf_list.csv`（已實測 330 檔）。
-- [`etf_fetch.py`](etf_fetch.py)：**單檔抓價工具（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
 - [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
 - [`schema.sql`](schema.sql)：MySQL 三張表定義。
 
