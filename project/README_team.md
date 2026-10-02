@@ -20,8 +20,7 @@ FinMind(全台股清單) → 篩 ETF → 篩被動式(330檔)
 |------|------|
 | `project/etf_universe.py` | 全台股 → 篩 ETF → 篩被動式，產生收錄清單（FinMind） |
 | `project/etf_fetch.py` | 單檔抓價工具（使用者輸入代號 → Yahoo → CSV，初學者友善） |
-| `project/etf_fetch_pro.py` | 抓價函式庫（market-aware，供 `etf_to_mysql.py` 匯入） |
-| `project/etf_to_mysql.py` | 主流程：讀清單 → 抓價 → 寫進 MySQL 三張表 |
+| `project/etf_to_mysql.py` | 主流程：讀清單 → 依市場抓價 → 寫進 MySQL 三張表（自給自足） |
 | `project/schema.sql` | 建立三張資料表 |
 | `Dockerfile` / `docker-compose.yml` | 打包成 image、一鍵起 MySQL + 抓價入庫 |
 | `pyproject.toml` / `uv.lock` | 依賴管理（uv，pandas / pymysql） |

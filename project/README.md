@@ -248,7 +248,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 ### 串起來（清單 → 抓價 → 入庫）
 1. （可選）`uv run python project/etf_universe.py` → 產生 `passive_etf_list.csv`（330 檔）供檢視。
 2. `uv run python project/etf_to_mysql.py` → **自動**抓被動式清單、依 `market` 給 `.TW`/`.TWO`、寫進 MySQL 三張表。
-   > `etf_to_mysql.py` 已直接呼叫 `etf_universe.get_passive_etf_list()`，並用 `etf_fetch_pro.fetch_chart(stock_id, market)` 處理上市/上櫃後綴，不需手動改。
+   > `etf_to_mysql.py` 已直接呼叫 `etf_universe.get_passive_etf_list()`，並自行處理上市/上櫃後綴（自給自足、初學者寫法），不需手動改。
 
 ---
 
@@ -287,8 +287,7 @@ docker push mark0403/etf-crawler:0.0.1
 ### 檔案
 - [`../Dockerfile`](../Dockerfile) / [`../docker-compose.yml`](../docker-compose.yml)：打包成 image、一鍵起 MySQL+抓價入庫。
 - [`etf_universe.py`](etf_universe.py)：全台股 → ETF → 被動式，產生收錄清單 `passive_etf_list.csv`（已實測 330 檔）。
-- [`etf_fetch.py`](etf_fetch.py)：**主檔（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
-- [`etf_fetch_pro.py`](etf_fetch_pro.py)：**進階版**，功能相同，用實務寫法（型別標註、list comprehension 等），供對照學習；`etf_to_mysql.py` 也是 import 這支的函式。
+- [`etf_fetch.py`](etf_fetch.py)：**單檔抓價工具（初學者友善）**，只用課程教過的基本寫法（普通 for 迴圈、if/else、無型別標註）。執行時會**讓你輸入要查的 ETF 代號**（直接按 Enter 用預設）。已實測。
 - [`etf_to_mysql.py`](etf_to_mysql.py)：寫入 MySQL 三張表（已用 MariaDB 實測、冪等）。
 - [`schema.sql`](schema.sql)：MySQL 三張表定義。
 
