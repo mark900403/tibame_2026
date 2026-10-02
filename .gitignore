@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+# ETF 抓取產出的資料檔（不進版控）
+etf_price.csv
+etf_dividend.csv
+etf_split.csv
+passive_etf_list.csv
+.venv/
