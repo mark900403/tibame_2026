@@ -256,6 +256,8 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 把「抓被動式 ETF → 寫進 MySQL」整包打包成 image，到哪都能跑。相關檔在 **repo 根目錄**：`Dockerfile`、`docker-compose.yml`、`.dockerignore`。
 
+> ⚠ **備註：下方的 `mark0403` 是範例 Docker Hub 帳號，請改成「你自己的」Docker Hub 帳號**（每位組員各自的帳號）。
+
 ### 方式一：`docker compose` 一鍵（含 MySQL，最簡單）
 ```bash
 docker compose up --build      # 建 image、起 MySQL（自動載入 schema.sql 建表）、跑抓價入庫
@@ -268,6 +270,7 @@ docker compose down            # 關閉（要連資料一起刪加 -v）
 
 ### 方式二：只 build image、連你自己的 MySQL
 ```bash
+# ⚠ mark0403 請改成你自己的 Docker Hub 帳號
 docker build -t mark0403/etf-crawler:0.0.1 .
 docker run --rm \
   -e MYSQL_HOST=你的DB位置 -e MYSQL_USER=帳號 -e MYSQL_PASSWORD=密碼 -e MYSQL_DB=etf \
