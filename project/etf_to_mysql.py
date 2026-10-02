@@ -38,15 +38,17 @@ def _save(df, sql: str) -> int:
     if df is None or df.empty:
         return 0
     rows = df.where(df.notna(), None).to_dict("records")   # NaN → None
+    conn = get_conn()                          # 先建立連線（連線失敗會直接丟出真正的錯誤）
     try:
-        with get_conn() as conn:
-            with conn.cursor() as cur:
-                cur.executemany(sql, rows)     # 批次寫入，比一筆筆快很多
-            conn.commit()                      # 異動一定要 commit
+        with conn.cursor() as cur:
+            cur.executemany(sql, rows)         # 批次寫入，比一筆筆快很多
+        conn.commit()                          # 異動一定要 commit
         return len(rows)
     except Exception:
         conn.rollback()                        # 出錯就還原，避免寫一半
         raise
+    finally:
+        conn.close()                           # 不論成敗都關閉連線
 
 
 def save_prices(df) -> int:
