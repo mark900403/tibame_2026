@@ -283,7 +283,39 @@ docker push mark0403/etf-crawler:0.0.1
 
 ---
 
+## 13. 交付：Docker Swarm + Airflow 定時更新（對照老師作業要求）
+
+| 老師要求 | 本專案對應 | 狀態 |
+|----------|------------|------|
+| 爬蟲改用 **Docker Swarm** 架構、yml 上 github | [`docker-compose-etf-swarm.yml`](docker-compose-etf-swarm.yml)（`deploy`/placement/overlay） | ✅ 已提供 |
+| 建立 **Airflow DAG**、定時更新 MySQL | [`dags/etf_etl_dag.py`](dags/etf_etl_dag.py)（DockerOperator，每天收盤後跑） | ✅ 已提供 |
+| 專題 MySQL 資料**自動定期更新** | Airflow DAG，或簡易版 [`etf_scheduler.py`](etf_scheduler.py)（apscheduler） | ✅ 已提供 |
+| Airflow 改用**自己的 Repo / Docker Image** | 需你 `docker push mark0403/etf-crawler`（見下方「還缺」） | ⬜ 待你 push |
+| **架構圖更新** | 見下方 ASCII（請畫成 draw.io 放 team repo） | ⬜ 待你畫 |
+
+### 架構（你負責的 ETF 這一段）
+```
+stock.etf_list (athlan 的清單)
+        │  讀
+        ▼
+Airflow DAG(每日收盤後) ──觸發──▶ etf-crawler image(etf_to_mysql.py) ──▶ MySQL: etf_price/dividend/split
+        （Docker Swarm 部署、overlay network 用服務名稱連 mysql）        │
+                                                            goal_calculator.py：ETF報酬 + 六都房價
+```
+
+### 執行（Swarm）
+```bash
+docker network create --scope=swarm --driver=overlay my_swarm_network
+MYSQL_PASSWORD=... DOCKER_IMAGE_VERSION=0.0.1 \
+  docker stack deploy --with-registry-auth -c docker-compose-etf-swarm.yml etf
+```
+
+---
+
 ### 檔案
+- [`docker-compose-etf-swarm.yml`](docker-compose-etf-swarm.yml)：ETF 爬蟲的 Docker Swarm 部署檔。
+- [`dags/etf_etl_dag.py`](dags/etf_etl_dag.py)：Airflow DAG，定時更新 MySQL。
+- [`etf_scheduler.py`](etf_scheduler.py)：apscheduler 簡易定時更新（Airflow 的輕量替代）。
 - [`../Dockerfile`](../Dockerfile) / [`../docker-compose.yml`](../docker-compose.yml)：打包成 image、一鍵起 MySQL+抓價入庫。
 - [`goal_calculator.py`](goal_calculator.py)：讀 `etf_price` 算 ETF 含息報酬(CAGR) + 六都房價 → 「每月投入 X → 10 年後能否付頭期款」（已實測）。
 - [`etf_universe.py`](etf_universe.py)：全台股 → ETF → 被動式（**備援用**；清單主要讀組員的 `stock.etf_list`）。
