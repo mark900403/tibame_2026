@@ -181,4 +181,46 @@
 | 參數化查詢 | 用 `%s`/`%(key)s` 安全代入值，防 SQL Injection |
 | fetchone / fetchall | 取一筆 / 取全部查詢結果 |
 
+## 資料工程 ETL 與部署進階（第四部分）
+| 名詞 | 白話解釋 |
+|------|----------|
+| ETL | Extract 收集 → Transform 清理/儲存 → Load 讀取 |
+| dev/test/prod | 開發 / 測試(CI) / 產品 三種環境 |
+| `.env` | 環境變數檔；放機密，不進 git |
+| local.ini / genenv.py | 各環境設定模板 / 產生 .env |
+| config.py | 程式讀環境變數的地方 |
+| Secret Manager | 雲端機密管理（GCP/AWS），別把密碼放 git |
+| `${VAR}` | compose 用環境變數（如 image 版本） |
+| apscheduler | Python 排程套件（interval/cron 定時執行） |
+| loguru | 顯示 log 的套件（背景排程 print 看不到） |
+| blocking/background | 排程阻塞模式 / 背景模式（背景要 while+sleep） |
+| phpMyAdmin | MySQL 的網頁管理介面 |
+| volume | Docker 資料卷，持久化（容器關了資料還在） |
+| 主鍵 Primary Key | 唯一、非空、自動建 index；爬蟲去重靠它 |
+| RDB/NoSQL/TSDB | 關聯式 / 非關聯式(Redis,Mongo) / 時間序列 |
+| Redis | 存記憶體的 NoSQL，快取用，快 20 倍+ |
+| SQLAlchemy | Python 操作資料庫的 ORM/工具 |
+| `to_sql(append)` | pandas 把 DataFrame 寫入 MySQL（新增） |
+| 自動去重 upsert | 主鍵重複時更新成最新一筆（on duplicate key update） |
+| FastAPI | 現代高效能 Python API 框架（業界主流） |
+| uvicorn | FastAPI 的 web server |
+| Swagger UI | FastAPI 自動產生的 API 文件介面（/docs） |
+| RESTful API | 用 GET/POST/PUT/DELETE 的 API 設計規範 |
+| Redash | 免費開源視覺化工具，連 DB 寫 SQL 做 dashboard |
+| JOIN | 用共同欄位合併多張表（left/right/inner） |
+| Docker Swarm | 管理多個 compose/多台 VM；輕量版 K8s |
+| K8s | Kubernetes，大型容器編排，比 Swarm 複雜 |
+| Manager/Node | Swarm 主管(發指令)/工人(做事) |
+| Portainer | Swarm 的 Web 管理介面，看 log/管服務 |
+| stack | 一個 compose 的多個 service 合稱 |
+| overlay network | Swarm 跨 VM 溝通的網路 |
+| Node Labels | 給 Node 貼標籤，指定服務跑在哪台 |
+| Task.Slot | Swarm 任務槽編號，給多副本不同 hostname |
+| replicas | 服務副本數，一鍵擴展 |
+| Airflow | 業界主流排程/工作流工具，有 Web UI |
+| DAG | 有向非循環圖，描述任務先後關係 |
+| Operator | Airflow 任務種類（Bash/Python/Branch/Docker…） |
+| CeleryExecutor | Airflow 用 Celery 分散式執行任務 |
+| `docker.sock` | 掛載後可在容器內控制宿主機 Docker |
+
 ⬅ 回 [課程總覽](../README.md)

@@ -45,6 +45,21 @@
 | 19 | View 與 Index | 檢視表（虛擬表）、索引（加速查詢） | [notes/19_view_index.md](notes/19_view_index.md) |
 | 20 | PyMySQL | 用 Python 連 MySQL、參數化查詢、commit | [notes/20_pymysql.md](notes/20_pymysql.md) |
 
+### 第四部分：資料工程 ETL 與部署進階（Docker 產線）
+
+> 把爬蟲工程化成一條完整產線：**Extract（分散式爬蟲）→ Transform（MySQL）→ Load（API）→ 視覺化（Redash）→ 部署管理（Swarm）→ 排程（Airflow）**。
+
+| # | 主題 | 你會學到 | 筆記 |
+|---|------|----------|------|
+| 21 | 環境管理與排程 | `.env`/`config`、資安、`apscheduler` 定時任務 | [notes/21_env_config_scheduler.md](notes/21_env_config_scheduler.md) |
+| 22 | Docker 部署 MySQL | 專案結構、`mysql.yml`+phpMyAdmin、主鍵、RDB/NoSQL/TSDB | [notes/22_docker_mysql_deploy.md](notes/22_docker_mysql_deploy.md) |
+| 23 | Worker 上傳 MySQL | SQLAlchemy 上傳、自動去重、ETL | [notes/23_worker_upload_mysql.md](notes/23_worker_upload_mysql.md) |
+| 24 | API：FastAPI (Load) | FastAPI、uvicorn、Swagger、讀 MySQL、Docker 部署 | [notes/24_api_fastapi.md](notes/24_api_fastapi.md) |
+| 25 | 資料視覺化：Redash | 連 MySQL、SQL query、下拉選單、JOIN、Dashboard | [notes/25_redash_visualization.md](notes/25_redash_visualization.md) |
+| 26 | Docker Swarm 介紹 | Portainer、stack deploy、overlay network、多機 | [notes/26_docker_swarm_intro.md](notes/26_docker_swarm_intro.md) |
+| 27 | Docker Swarm 實戰 | Node Labels、Task.Slot、一鍵擴展、分散式 API | [notes/27_docker_swarm_practice.md](notes/27_docker_swarm_practice.md) |
+| 28 | Airflow | DAG、Operator、CeleryExecutor、排程工作流 | [notes/28_airflow.md](notes/28_airflow.md) |
+
 ### 工具
 
 | # | 主題 | 內容 | 連結 |
