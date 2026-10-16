@@ -18,7 +18,7 @@ FinMind(全台股清單) → 篩 ETF → 篩被動式(330檔)
 
 | 檔案 | 功能 |
 |------|------|
-| `project/etf_to_mysql.py` | 主流程：讀組員 athlan 的 `stock.etf_list` → 依市場抓價 → 寫進 MySQL 三張表 |
+| `project/etf_to_mysql.py` | 主流程：讀組員 的 `stock.etf_list` → 依市場抓價 → 寫進 MySQL 三張表 |
 | `project/goal_calculator.py` | 讀 `etf_price` 算 ETF 含息報酬 + 六都房價 → 每月投入/能否付頭期款 |
 | `project/etf_universe.py` | 全台股→ETF→被動式（備援；清單主要讀 `stock.etf_list`） |
 | `project/schema.sql` | 建立三張資料表 |
@@ -49,11 +49,11 @@ uv run python project/etf_to_mysql.py    # 不設 ETF_LIMIT 就跑全部被動�
 docker compose up --build                # 一鍵：起 MySQL（自動建表）+ 抓價入庫
 ```
 
-> ⚠ **`Dockerfile` / `docker-compose.yml` / 下列指令中的 `mark0403` 是範例 Docker Hub 帳號，請改成你自己的帳號。**
+> ⚠ **`Dockerfile` / `docker-compose.yml` / 下列指令中的 `your-dockerhub-account` 是範例 Docker Hub 帳號，請改成你自己的帳號。**
 ```bash
-docker build -t mark0403/etf-crawler:0.0.1 .   # ← mark0403 改成你的帳號
+docker build -t your-dockerhub-account/etf-crawler:0.0.1 .   # ← your-dockerhub-account 改成你的帳號
 docker login
-docker push mark0403/etf-crawler:0.0.1
+docker push your-dockerhub-account/etf-crawler:0.0.1
 ```
 
 ## 資料來源

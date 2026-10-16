@@ -245,7 +245,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
   ```
 
 ### 串起來（清單 → 抓價 → 入庫）
-1. **清單**：`etf_to_mysql.py` 會先讀組員 athlan 的 **`stock.etf_list`**（已篩好的被動式 ETF）；讀不到才用 `etf_universe.py` 現抓 FinMind 當備援。可用環境變數 `ETF_LIST_DB`/`ETF_LIST_TABLE` 調整來源。
+1. **清單**：`etf_to_mysql.py` 會先讀組員 的 **`stock.etf_list`**（已篩好的被動式 ETF）；讀不到才用 `etf_universe.py` 現抓 FinMind 當備援。可用環境變數 `ETF_LIST_DB`/`ETF_LIST_TABLE` 調整來源。
 2. **抓價入庫**：`uv run python project/etf_to_mysql.py` → 依 `market` 給 `.TW`/`.TWO`、抓股價/除權息/分割、寫進 MySQL 三張表。
 3. **目標試算**：`uv run python project/goal_calculator.py` → 讀 `etf_price` 算各 ETF 含息年化報酬(CAGR)，結合六都房價參數，算「每月需投入多少 / 每月投入 X 能否付頭期款」。
 
@@ -255,7 +255,7 @@ print(monthly_needed(15_000_000, 0.07))  # ≈ 每月 86,000 元左右
 
 把「抓被動式 ETF → 寫進 MySQL」整包打包成 image，到哪都能跑。相關檔在 **repo 根目錄**：`Dockerfile`、`docker-compose.yml`、`.dockerignore`。
 
-> ⚠ **備註：下方的 `mark0403` 是範例 Docker Hub 帳號，請改成「你自己的」Docker Hub 帳號**（每位組員各自的帳號）。
+> ⚠ **備註：下方的 `your-dockerhub-account` 是範例 Docker Hub 帳號，請改成「你自己的」Docker Hub 帳號**（每位組員各自的帳號）。
 
 ### 方式一：`docker compose` 一鍵（含 MySQL，最簡單）
 ```bash
@@ -269,14 +269,14 @@ docker compose down            # 關閉（要連資料一起刪加 -v）
 
 ### 方式二：只 build image、連你自己的 MySQL
 ```bash
-# ⚠ mark0403 請改成你自己的 Docker Hub 帳號
-docker build -t mark0403/etf-crawler:0.0.1 .
+# ⚠ your-dockerhub-account 請改成你自己的 Docker Hub 帳號
+docker build -t your-dockerhub-account/etf-crawler:0.0.1 .
 docker run --rm \
   -e MYSQL_HOST=你的DB位置 -e MYSQL_USER=帳號 -e MYSQL_PASSWORD=密碼 -e MYSQL_DB=etf \
-  mark0403/etf-crawler:0.0.1
+  your-dockerhub-account/etf-crawler:0.0.1
 # 上傳 Docker Hub（course 12）：先登入再 push
 docker login                                  # 輸入 Docker Hub 帳密/Token
-docker push mark0403/etf-crawler:0.0.1
+docker push your-dockerhub-account/etf-crawler:0.0.1
 ```
 
 > ⚠ 說明：這份 Dockerfile / compose 已寫好並通過 YAML 驗證，但**產生它的雲端環境沒有 Docker**，所以無法在該處實際 build；請在你有 **Docker Desktop** 的機器上建置。裡面要跑的 Python 抓價入庫流程，已在本機 MariaDB 實測通過（見第 6 節）。
@@ -290,12 +290,12 @@ docker push mark0403/etf-crawler:0.0.1
 | 爬蟲改用 **Docker Swarm** 架構、yml 上 github | [`docker-compose-etf-swarm.yml`](docker-compose-etf-swarm.yml)（`deploy`/placement/overlay） | ✅ 已提供 |
 | 建立 **Airflow DAG**、定時更新 MySQL | [`dags/etf_etl_dag.py`](dags/etf_etl_dag.py)（DockerOperator，每天收盤後跑） | ✅ 已提供 |
 | 專題 MySQL 資料**自動定期更新** | Airflow DAG，或簡易版 [`etf_scheduler.py`](etf_scheduler.py)（apscheduler） | ✅ 已提供 |
-| Airflow 改用**自己的 Repo / Docker Image** | 需你 `docker push mark0403/etf-crawler`（見下方「還缺」） | ⬜ 待你 push |
+| Airflow 改用**自己的 Repo / Docker Image** | 需你 `docker push your-dockerhub-account/etf-crawler`（見下方「還缺」） | ⬜ 待你 push |
 | **架構圖更新** | 見下方 ASCII（請畫成 draw.io 放 team repo） | ⬜ 待你畫 |
 
 ### 架構（你負責的 ETF 這一段）
 ```
-stock.etf_list (athlan 的清單)
+stock.etf_list (組員 的清單)
         │  讀
         ▼
 Airflow DAG(每日收盤後) ──觸發──▶ etf-crawler image(etf_to_mysql.py) ──▶ MySQL: etf_price/dividend/split
