@@ -19,8 +19,13 @@ FinMind(全台股清單) → 篩 ETF → 篩被動式(約 330 檔)
 | 檔案 | 功能 |
 |------|------|
 | `etf_to_mysql.py` | 主流程：讀組員 athlan 的 `stock.etf_list` → 依市場抓價 → 寫進 MySQL 三張表 |
-| `goal_calculator.py` | 讀 `etf_price` 算 ETF 含息報酬 + 六都房價 → 每月投入/能否付頭期款 |
+| `goal_calculator.py` | 讀 `etf_price` 算 ETF 含息報酬 + 六都房價 → 每月投入/能否付頭期款（結果寫回 `etf_cagr`/`goal_down_payment` 給 Redash） |
 | `etf_universe.py` | 全台股→ETF→被動式（備援；清單主要讀 `stock.etf_list`） |
+| `etf_worker.py` / `etf_tasks.py` / `etf_producer.py` | 分散式版：producer→RabbitMQ→Celery worker 抓價入庫 |
+| `etf_scheduler.py` | apscheduler 定時更新（Airflow 的輕量替代） |
+| `docker-compose-etf-swarm.yml` | Docker Swarm 部署檔 |
+| `dags/etf_etl_dag.py` | Airflow DAG：每日定時更新 MySQL |
+| `UNFINISHED.md` | **未完成/待辦事項**（帳號、連線、跨組員資料） |
 | `schema.sql` | 建立三張資料表 |
 | `Dockerfile` / `docker-compose.yml` | 打包 image、一鍵起 MySQL + 抓價入庫 |
 | `pyproject.toml` / `uv.lock` | 依賴管理（uv：pandas、pymysql） |

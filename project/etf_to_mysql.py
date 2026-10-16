@@ -188,4 +188,6 @@ def main():
         print("失敗", len(failed), "檔：", failed)
 
 
-main()
+# 只有「直接執行這個檔」時才跑 main()；被 etf_tasks/etf_producer/etf_scheduler import 時不會自動執行
+if __name__ == "__main__":
+    main()

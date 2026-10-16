@@ -30,3 +30,26 @@ CREATE TABLE IF NOT EXISTS etf_split (
     ratio        VARCHAR(16),                     -- 如 "4:1"
     PRIMARY KEY (stock_id, split_date)
 );
+
+-- ── 以下為 goal_calculator.py 的輸出表（給 Redash 畫 dashboard 用）──
+
+-- 4) 各 ETF 含息年化報酬(CAGR)
+CREATE TABLE IF NOT EXISTS etf_cagr (
+    stock_id     VARCHAR(16)  NOT NULL,
+    cagr         DECIMAL(8,5),                    -- 年化報酬，例如 0.21800 = 21.8%
+    computed_at  DATETIME,                        -- 計算時間
+    PRIMARY KEY (stock_id)
+);
+
+-- 5) 六都頭期款試算結果
+CREATE TABLE IF NOT EXISTS goal_down_payment (
+    city                         VARCHAR(16) NOT NULL,   -- 城市
+    house_price_wan              INT,                    -- 房價(萬元)
+    down_payment                 BIGINT,                 -- 頭期款(元)
+    primary_etf                  VARCHAR(16),            -- 試算用的 ETF
+    primary_return               DECIMAL(8,5),           -- 該 ETF 年化報酬
+    monthly_needed_primary       BIGINT,                 -- 每月需投入(主要報酬率)
+    monthly_needed_conservative  BIGINT,                 -- 每月需投入(保守報酬率)
+    computed_at                  DATETIME,
+    PRIMARY KEY (city)
+);

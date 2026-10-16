@@ -10,6 +10,7 @@
 #   uv run python goal_calculator.py
 
 import os
+import datetime
 import pandas as pd
 import pymysql
 
@@ -104,6 +105,37 @@ def pick_return(cagr):
     return None, None
 
 
+def save_results(cagr, city_rows):
+    # 把結果寫回 MySQL（etf_cagr、goal_down_payment），給 Redash 畫 dashboard
+    now = datetime.datetime.now()
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cagr_rows = [(sid, round(cagr[sid], 5), now) for sid in cagr]
+            cur.executemany(
+                "insert into etf_cagr (stock_id, cagr, computed_at) values (%s,%s,%s) "
+                "on duplicate key update cagr=values(cagr), computed_at=values(computed_at)",
+                cagr_rows)
+            cur.executemany(
+                "insert into goal_down_payment "
+                "(city, house_price_wan, down_payment, primary_etf, primary_return, "
+                " monthly_needed_primary, monthly_needed_conservative, computed_at) "
+                "values (%s,%s,%s,%s,%s,%s,%s,%s) "
+                "on duplicate key update house_price_wan=values(house_price_wan), "
+                "down_payment=values(down_payment), primary_etf=values(primary_etf), "
+                "primary_return=values(primary_return), "
+                "monthly_needed_primary=values(monthly_needed_primary), "
+                "monthly_needed_conservative=values(monthly_needed_conservative), "
+                "computed_at=values(computed_at)",
+                [row + (now,) for row in city_rows])     # 每列補上 computed_at
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
 def main():
     prices = load_etf_prices()
     if len(prices) == 0:
@@ -125,12 +157,19 @@ def main():
     print(f"\n=== 六都：每月需投入多少，{YEARS} 年後能付頭期款 ===")
     header = f"{'城市':<6}{'房價(萬)':>8}{'頭期款(萬)':>10}{'每月需投入@' + name:>16}{'每月需投入@保守':>16}"
     print(header)
+    city_rows = []
     for city, price_wan in SIX_CITIES_PRICE_WAN.items():
         target = price_wan * 10000 * DOWN_PAYMENT_RATIO          # 萬元→元 ×成數
         need_main = monthly_needed(target, r, YEARS)
         need_cons = monthly_needed(target, CONSERVATIVE_RETURN, YEARS)
         print(f"{city:<6}{price_wan:>8}{price_wan * DOWN_PAYMENT_RATIO:>10.0f}"
               f"{need_main:>16,.0f}{need_cons:>16,.0f}")
+        city_rows.append((city, price_wan, int(target), name, round(r, 5),
+                          int(need_main), int(need_cons)))
+
+    # 寫回 MySQL，給 Redash 用（computed_at 由 save_results 自動補上）
+    save_results(cagr, city_rows)
+    print("\n已把結果寫回 MySQL：etf_cagr、goal_down_payment（可用 Redash 畫 dashboard）")
 
     if MONTHLY_INVEST > 0:
         fv_main = future_value_monthly(MONTHLY_INVEST, r, YEARS)
