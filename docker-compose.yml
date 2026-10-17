@@ -1,8 +1,9 @@
-# 一鍵起「MySQL + 抓價入庫程式」（對應課程 12 Docker-Compose / network）
+# 一鍵起「MySQL + phpMyAdmin + 抓價入庫程式」（對應課程 12/22）
 # 用法：
-#   docker compose up --build          # 建 image、起 MySQL、跑抓價入庫
+#   docker compose up --build          # 建 image、起 MySQL+phpMyAdmin、跑抓價入庫
 #   docker compose down                # 關閉（加 -v 連資料一起刪）
 #
+# 看資料：瀏覽器開 http://localhost:8080（帳號 root / 密碼 rootpass）
 # MySQL 會自動載入 project/schema.sql 建表；crawler 會等 MySQL 健康後才開始寫入。
 
 services:
@@ -37,6 +38,17 @@ services:
       MYSQL_PASSWORD: rootpass
       MYSQL_DB: etf
       # ETF_LIMIT: "15"              # 想先小量測試就把這行打開
+
+  # 網頁版 MySQL 管理介面（course 22）：開 http://localhost:8080，帳號 root / 密碼 rootpass
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: "3306"
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
